@@ -1,24 +1,16 @@
 #include <stdio.h>
 #include <stdint.h>
 
-// 符号付き整数で右シフトを行う場合、最上位ビット（符号ビット）がコピーされることがある
-// この挙動はプラットフォームに依存するため、unsigned intの使用を推奨
-
-int hexToBinary(uint32_t hex)
-{
-    for (int i = 31; i >= 0; i--)
-    {
-        if ((hex & (1 << i)))
-        {
+int hexToBinary(uint32_t hex){
+    for (int i = 31; i >= 0; i--){
+        if ((hex & (1 << i))){
             printf("1");
         }
-        else
-        {
+        else{
             printf("0");
         }
 
-        if (i % 4 == 0)
-        { // 4ビットごとにスペースを挿入
+        if (i % 4 == 0){ // 4ビットごとにスペースを挿入
             printf(" ");
         }
     }
@@ -26,13 +18,11 @@ int hexToBinary(uint32_t hex)
     return 0;
 }
 
-unsigned int rightShift(unsigned int value, int shiftAmount)
-{
+unsigned int rightShift(unsigned int value, int shiftAmount){
     return value >> shiftAmount;
 }
 
-unsigned int leftShift(unsigned int value, int shiftAmount)
-{
+unsigned int leftShift(unsigned int value, int shiftAmount){
     return value << shiftAmount;
 }
 
@@ -69,6 +59,16 @@ int main()
         printf("%02X ", myarray[j]);
     }
     printf("\n");
+
+    // シフト前16進数:AF
+    // 0000 0000 0000 0000 0000 0000 1010 1111 
+    // シフト後16進数:15
+    // 0000 0000 0000 0000 0000 0000 0001 0101 
+
+    // 左シフト前の配列
+    // FF FF FF FF FF FF FF FF 
+    // 左シフト後の配列
+    // F8 F8 F8 F8 F8 F8 F8 F8 
 
     return 0;
 }
