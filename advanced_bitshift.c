@@ -79,6 +79,19 @@ uint8_t toggleBitAtPosition(uint8_t value, int position) {
     return value ^ mask;  // XORを使って指定したビット位置をトグル
 }
 
+// 8ビット値を左にローテートする関数
+uint8_t rotateLeft(uint8_t value, int positions) {
+    positions %= 8;  // 8以上の回転は冗長なので、8での剰余を取る
+    return (value << positions) | (value >> (8 - positions));
+}
+
+// 8ビット値を右にローテートする関数
+uint8_t rotateRight(uint8_t value, int positions) {
+    positions %= 8;  // 8以上の回転は冗長なので、8での剰余を取る
+    return (value >> positions) | (value << (8 - positions));  
+    // 両方が1であれば結果として1を、両方が0であれば0
+}
+
 int main(){
 
     // ビットマスク
@@ -127,6 +140,23 @@ int main(){
     printBinary(val_toggle);
     // Before: 1111 0000
     // After : 1110 0000
+
+    //ローテート
+    printf("ローテート\n");
+    uint8_t value_rotate = 0b11010010;
+    uint8_t value_rotate_left;
+    uint8_t value_rotate_right;
+    printf("Original value  :");
+    printBinary(value_rotate);
+    value_rotate_left = rotateLeft(value_rotate, 1);
+    printf("Left  rotated   :");
+    printBinary(value_rotate_left);
+    value_rotate_right = rotateRight(value_rotate, 1);
+    printf("Right rotated   :");
+    printBinary(value_rotate_right);
+    // Original value  :1101 0010
+    // Left  rotated   :1010 0101
+    // Right rotated   :0110 1001
 
     return 0;
 }
