@@ -1,5 +1,6 @@
 // LED1のピン番号を定義
-#define LED1 13 
+#define LED1 13
+#define WHITE 6 
 
 // プロトタイプ宣言
 int blink(int pin, int state);
@@ -8,6 +9,7 @@ void blink_1sec_led(unsigned char &count, int &state);
 void setup(){
     // LED1を出力モードに設定
     pinMode(LED1, OUTPUT);
+    pinMode(WHITE, OUTPUT);
     Serial.begin(9600);  // シリアル通信の開始
 }
 
@@ -16,6 +18,8 @@ void loop(){
     static unsigned char count = 0;
     static unsigned long millis_buf = 0;
     static int state1 = HIGH;
+
+    digitalWrite(WHITE, HIGH);
 
     //　現在の経過時間-この待機処理を通過した時間が1000(ms)になるまで待機
     while ((millis() - millis_buf) < 1000){
@@ -34,7 +38,7 @@ void loop(){
 
 // countの値に応じてLEDを点滅させる関数
 void blink_1sec_led(unsigned char &count, int &state){
-    if((count % 3) == 0){
+    if((count % 10) == 0){
       state = blink(LED1, state);
     }
 }
