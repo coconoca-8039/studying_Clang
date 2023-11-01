@@ -4,7 +4,10 @@
 #define LED3 6
 #define LED4 13
 #define MAX_CASE 3  // LEDの最大個数
-#define UPDATE_INTERVAL 2  // LEDの点滅周期 10で1秒 100で10秒
+#define UPDATE_INTERVAL 10  // LEDの点滅周期 10で1秒 100で10秒
+
+#define NUM_LEDS 3  // LEDの数
+int ledPins[NUM_LEDS] = {3, 5, 6};
 
 // プロトタイプ宣言
 void cycleLEDs(int currentCase);
@@ -42,7 +45,8 @@ void loop(){
         updateCurrentCase(currentCase);
     }
 
-    cycleLEDs(currentCase);  // LED3つの制御
+    //cycleLEDs(currentCase);  // LED3つの制御
+    toggleLEDs(currentCase);
     blink_led13(count, state);
 }
 
@@ -53,24 +57,34 @@ void updateCurrentCase(int &currentCase) {
     }
 }
 
-void cycleLEDs(int currentCase){
-   switch(currentCase){
-        case 0:
-            digitalWrite(LED1, HIGH);
-            digitalWrite(LED2, LOW);
-            digitalWrite(LED3, LOW);
-            break;
-        case 1:
-            digitalWrite(LED1, LOW);
-            digitalWrite(LED2, HIGH);
-            digitalWrite(LED3, LOW);
-            break;
-        case 2:
-            digitalWrite(LED1, LOW);
-            digitalWrite(LED2, LOW);
-            digitalWrite(LED3, HIGH);
-            break;
-    } 
+// void cycleLEDs(int currentCase){
+//    switch(currentCase){
+//         case 0:
+//             digitalWrite(LED1, HIGH);
+//             digitalWrite(LED2, LOW);
+//             digitalWrite(LED3, LOW);
+//             break;
+//         case 1:
+//             digitalWrite(LED1, LOW);
+//             digitalWrite(LED2, HIGH);
+//             digitalWrite(LED3, LOW);
+//             break;
+//         case 2:
+//             digitalWrite(LED1, LOW);
+//             digitalWrite(LED2, LOW);
+//             digitalWrite(LED3, HIGH);
+//             break;
+//     } 
+// }
+
+void toggleLEDs(int currentCase){
+    for (int i = 0; i < NUM_LEDS; i++) {
+        if (i == currentCase) {
+            digitalWrite(ledPins[i], HIGH);  // 点灯
+        } else {
+            digitalWrite(ledPins[i], LOW);  // 消灯
+        }
+    }
 }
 
 void blink_led13(unsigned char &count, int &state){

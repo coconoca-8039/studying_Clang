@@ -7,16 +7,14 @@
 #define LED6 35
 #define LED7 36
 #define LED8 37
-#define MAX_CASE 8  // LEDの最大個数
-#define UPDATE_INTERVAL 1  // LEDの点滅周期 10で1秒 100で10秒
+#define TIMER_END 255  // タイマーの終わり
+#define UPDATE_INTERVAL 10  // LEDの点滅周期 10で1秒 100で10秒
 #define NUM_LEDS 8  // LEDの数
 int ledPins[NUM_LEDS] = {30, 31, 32, 33, 34, 35, 36, 37};
 unsigned int currentMinute = 0;  // Start of Timer
 
 // プロトタイプ宣言
-void updateCurrentCase(int &currentCase);
-void blink_led13(unsigned char &count, int &state);
-int blink(int pin, int state);
+void updatecurrentTimer(int &currentTimer);
 
 void setup(){
     // LEDを出力モードに設定
@@ -35,7 +33,7 @@ void loop(){
     // staticを付けて変数の値を保持
     static unsigned char count = 0;
     static unsigned long millis_buf = 0;
-    static int currentCase = 0;
+    static int currentTimer = 0;  // これがmax255で止まるタイマーになる
     static int state = HIGH;
 
     //100ミリ秒経過したら次の処理に移行する
@@ -44,30 +42,31 @@ void loop(){
         ;
     }
     millis_buf = millis();
-    Serial.println(millis_buf);
+    // Serial.println(millis_buf);
 
     count++;
 
     if (count % UPDATE_INTERVAL == 0) {
-        updateCurrentCase(currentCase);
-    }
-
-    toggleLEDs(currentCase);
-}
-
-void updateCurrentCase(int &currentCase) {
-    currentCase++;
-    if (currentCase > MAX_CASE) {
-        currentCase = 0;
+        timer(currentTimer);
+        updatecurrentTimer(currentTimer);
     }
 }
 
-void toggleLEDs(int currentCase){
+void updatecurrentTimer(int &currentTimer) {
+    Serial.println(currentTimer);
+    currentTimer++;
+    if (currentTimer > TIMER_END) {
+        currentTimer = 0;
+    }
+}
+
+void timer(int &currentTimer){
     for (int i = 0; i < NUM_LEDS; i++) {
-        if (i == currentCase) {
-            digitalWrite(ledPins[i], HIGH);  // 点灯
-        } else {
-            digitalWrite(ledPins[i], LOW);  // 消灯
-        }
+      if (currentTimer & (1 << i)) {
+        digitalWrite(ledPins[i], HIGH);
+      } else {
+        digitalWrite(ledPins[i], LOW);
+      }
     }
 }
+
