@@ -24,6 +24,7 @@ void receiveCANMessage(MCP_CAN& can, unsigned long& id, byte& length, byte* rxBu
 void modifyCANDatatxBuf0(byte *txBuf0);
 void modifyCANDatatxBuf1(byte *txBuf1);
 void modifyCANDatatxBuf2(byte *txBuf2);
+void modifyCANDatatxBuf3(byte *txBuf3);
 void readBME280Data();
 
 // グローバル宣言
@@ -38,6 +39,7 @@ byte rxBuf[8];
 byte txBuf0[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 byte txBuf1[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 byte txBuf2[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+byte txBuf3[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 
 // インスタンス作成
 MCP_CAN CAN0(10);// CAN0 CS: pin 10
@@ -96,6 +98,7 @@ void loop(){
     if (count % UPDATE_INTERVAL_10SEC == 0){  // 10秒毎
       // 変更・取得 
       modifyCANDatatxBuf2(txBuf2);
+      modifyCANDatatxBuf3(txBuf3);
       // 送信
       sendCANMessage10Sec();
       }
@@ -107,9 +110,13 @@ void loop(){
 ///////////////////////////////////////////////////////////////////////////////////
 // データの取得
 void readBME280Data(){
-    float temperature = bme.readTemperature();
-    float humidity = bme.readHumidity();
-    float pressure = bme.readPressure() / 100.0F;
+    float temperature = 0;
+    float humidity = 0;
+    float pressure = 0;
+
+    temperature = bme.readTemperature();
+    humidity = bme.readHumidity();
+    pressure = bme.readPressure() / 100.0F;
 
     uint16_t tempInt = (int16_t)(temperature * 100); // 気温を100倍して整数に
     uint16_t humidInt = (int16_t)(humidity * 100); // 湿度を100倍して整数に
@@ -142,7 +149,7 @@ void modifyCANDatatxBuf0(byte *txBuf0){
 
 void modifyCANDatatxBuf1(byte *txBuf1){
   // 1sec
-  // Byte1 : 気温　Byte2 : 湿度　Byte3 : 気圧
+  // Byte1&2 : 気温　Byte3&4 : 湿度　Byte5&6 : 気圧
     // 気温データの格納
     txBuf1[0] = globalTempInt >> 8; // 上位バイト
     txBuf1[1] = globalTempInt & 0xFF; // 下位バイト
@@ -166,6 +173,11 @@ void modifyCANDatatxBuf2(byte *txBuf2){
     ;
 }
 
+void modifyCANDatatxBuf3(byte *txBuf3){
+  // 10sec
+    ;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 // 送信処理 1sec
 void sendCANMessage1Sec(){
@@ -176,7 +188,8 @@ void sendCANMessage1Sec(){
 
 // 送信処理 10sec
 void sendCANMessage10Sec(){
-    // CAN0.sendMsgBuf(0x18BBBBCC, 1, 8, txBuf2);
+    // CAN0.sendMsgBuf(0x11AAAABB, 1, 8, txBuf2);
+    // CAN0.sendMsgBuf(0x22BBBBCC, 1, 8, txBuf3);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
