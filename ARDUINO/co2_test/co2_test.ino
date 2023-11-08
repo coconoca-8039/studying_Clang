@@ -1,5 +1,7 @@
 // MH-Z19CのPWM出力ピンをArduinoのD2ピンに接続したと仮定します。
-int pwmPin = 7;
+int pwmPin = 2;
+
+#define TIMEOUT_PULSE 1054200
 
 unsigned long th, tl, ppm;
 
@@ -9,11 +11,12 @@ void setup() {
 }
 
 void loop() {
+
   // PWM波形を読み取る
-  th = pulseIn(pwmPin, HIGH, 1004000); // HIGHが続く時間（マイクロ秒）
-  tl = pulseIn(pwmPin, LOW, 1004000); // LOWが続く時間（マイクロ秒）
-  //th = pulseIn(pwmPin, HIGH); // HIGHが続く時間（マイクロ秒）
-  //tl = pulseIn(pwmPin, LOW); // LOWが続く時間（マイクロ秒）
+  th = pulseIn(pwmPin, HIGH, TIMEOUT_PULSE); // HIGHが続く時間（マイクロ秒）
+  tl = pulseIn(pwmPin, LOW, TIMEOUT_PULSE); // LOWが続く時間（マイクロ秒）
+  // th = pulseIn(pwmPin, HIGH); // HIGHが続く時間（マイクロ秒）
+  // tl = pulseIn(pwmPin, LOW); // LOWが続く時間（マイクロ秒）
 
   Serial.print("th : ");
   Serial.println(th);
