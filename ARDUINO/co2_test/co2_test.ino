@@ -1,38 +1,70 @@
-// MH-Z19CのPWM出力ピンをArduinoのD2ピンに接続したと仮定します。
-int pwmPin = 2;
+// const int pwmPin = 2; // PWMピン
 
-#define TIMEOUT_PULSE 1054200
+// void setup() {
+//   Serial.begin(115200);
+//   pinMode(pwmPin, INPUT);
+// }
 
-unsigned long th, tl, ppm;
+// void loop() {
+//   unsigned long duration = pulseIn(pwmPin, HIGH);
+//   Serial.print("High pulse duration: ");
+//   Serial.println(duration);
+
+//   delay(300);
+// }
+
+// const int pwmPin = 2; // PWMピン
+
+// void setup() {
+//   Serial.begin(115200);
+//   pinMode(pwmPin, INPUT);
+// }
+
+// void loop() {
+//   unsigned long duration = pulseIn(pwmPin, HIGH);
+//   Serial.print("High pulse duration: ");
+//   Serial.println(duration);
+//   int ppm = ((duration - 2 * 1000) * 5000) / (1004 * 1000 - 2 * duration); // この式はMH-Z19CのPWM出力仕様に基づいています。
+
+//   // 濃度を出力する
+//   Serial.print("CO2 concentration: ");
+//   Serial.print(ppm);
+//   Serial.println(" ppm");
+
+//   delay(300); // ここでのディレイはセンサーが次の値を生成するのを待つために使用します。
+// }
+
+const int pwmPin = 2; // PWMピン
 
 void setup() {
-  Serial.begin(115200); // シリアル通信を開始する
-  pinMode(pwmPin, INPUT); // PWMピンを入力として設定
+  Serial.begin(115200);
+  pinMode(pwmPin, INPUT);
 }
 
 void loop() {
+  unsigned long th = pulseIn(pwmPin, HIGH, 2000000); // タイムアウトを2秒に設定
+  unsigned long tl = pulseIn(pwmPin, LOW, 2000000);  // タイムアウトを2秒に設定
+  
+  // エラー確認
+  if (th == 0 || tl == 0) {
+    Serial.println("Error reading pulse.");
+    return; // 次のループまで待つ
+  }
 
-  // PWM波形を読み取る
-  th = pulseIn(pwmPin, HIGH, TIMEOUT_PULSE); // HIGHが続く時間（マイクロ秒）
-  tl = pulseIn(pwmPin, LOW, TIMEOUT_PULSE); // LOWが続く時間（マイクロ秒）
-  // th = pulseIn(pwmPin, HIGH); // HIGHが続く時間（マイクロ秒）
-  // tl = pulseIn(pwmPin, LOW); // LOWが続く時間（マイクロ秒）
-
-  Serial.print("th : ");
   Serial.println(th);
-  Serial.print("tl : ");
   Serial.println(tl);
   
-  // CO2濃度をppmで計算（MH-Z19Cの仕様に基づく）
-  ppm = 5000 * (th - 2 * 1000) / (th + tl - 4 * 1000); 
-  Serial.print("ppm : ");
-  Serial.println(ppm);
+  // マイクロ秒からミリ秒へ変換
+  float th_ms = th / 1000.0;
+  float tl_ms = tl / 1000.0;
 
-  // 結果をシリアルモニタに表示
-  Serial.print("CO2 Concentration is ");
+  // CO2濃度を計算
+  float ppm = (5000.0 * (th_ms - 2)) / (th_ms + tl_ms - 4);
+
+  // 濃度を出力する
+  Serial.print("CO2 concentration: ");
   Serial.print(ppm);
   Serial.println(" ppm");
 
-  // センサーからの次の読み取りまでに1秒待つ
-  delay(1000);
+  delay(50); // 次の読み取りまで待つ
 }
