@@ -1,6 +1,9 @@
 /***************************************************
 *
 *MCP2515 CAN Send and Recieve Test
+*MCP2515はSPI通信
+*BME280はI2C通信
+*QMC5883はI2C通信
 *
 ***************************************************/
 
@@ -12,6 +15,7 @@
 #include <Adafruit_BME280.h>
 // #include "modifyCANData.h"
 // #include "modifyCANData.cpp"
+#include <DFRobot_QMC5883.h>
 
 // define
 #define UPDATE_INTERVAL_1SEC 10  // 送信周期 10で1秒
@@ -44,7 +48,8 @@ byte txBuf3[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 // インスタンス作成
 MCP_CAN CAN0(10);// CAN0 CS: pin 10
 MCP_CAN CAN1(9); // CAN1 CS: pin 9
-Adafruit_BME280 bme; 
+Adafruit_BME280 bme;
+DFRobot_QMC5883 compass(&Wire, QMC5883_ADDRESS);
 
 void setup()
 {
@@ -72,6 +77,19 @@ void setup()
     while (1);
   }
   Serial.println("BME280: Init OK!");
+
+  // init QMC5880
+  while (!compass.begin()){
+    Serial.println("Could not find a valid 5883 sensor, check wiring!");
+  }
+  if(compass.isHMC()){
+    Serial.println("HMC5883: Init OK!");
+  }else if(compass.isQMC()){
+    Serial.println("IQMC5883: Init OK!");
+  }else if(compass.isVCM()){
+    Serial.println("VCM5883L: INit OK!");
+  }
+
 }
 
 void loop(){
