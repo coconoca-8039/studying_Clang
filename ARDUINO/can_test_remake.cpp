@@ -2,8 +2,8 @@
 *
 *MCP2515 CAN Send and Recieve Test
 *MCP2515はSPI通信
-*BME280はI2C通信 ID:0x77
-*QMC5883はI2C通信 ID:0x0D
+*BME280はI2C通信
+*QMC5883はI2C通信
 *
 ***************************************************/
 
@@ -15,7 +15,7 @@
 #include <Adafruit_BME280.h>
 // #include "modifyCANData.h"
 // #include "modifyCANData.cpp"
-#include <DFRobot_QMC5883.h>  // https://github.com/DFRobot/DFRobot_QMC5883/blob/master/DFRobot_QMC5883.h
+#include <DFRobot_QMC5883.h>
 
 // define
 #define UPDATE_INTERVAL_1SEC 10  // 送信周期 10で1秒
@@ -42,8 +42,8 @@ byte len;
 byte rxBuf[8];
 byte CAN_1234ABCD[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 byte CAN_AA1234AA[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-byte CAN_CCCC2222[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-byte CAN_CCCC4444[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+// byte CAN_CCCC2222[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+// byte CAN_CCCC4444[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 
 // インスタンス作成
 MCP_CAN CAN0(10);// CAN0 CS: pin 10
@@ -51,19 +51,9 @@ MCP_CAN CAN1(9); // CAN1 CS: pin 9
 Adafruit_BME280 bme;
 DFRobot_QMC5883 compass(&Wire, QMC5883_ADDRESS);
 
-int maxX = 2550;
-int maxY = 7480;
-int minX = -10150;
-int minY = -5060;
-//int offX = -6466;
-//int offY = 4349;
-int offX = 0;
-int offY = 0;
-
 void setup()
 {
   Serial.begin(115200);
-  Wire.begin();
 
   // init CAN0 bus, baudrate: 250kbps@8MHz
   if(CAN0.begin(MCP_ANY, CAN_250KBPS, MCP_8MHZ) == CAN_OK){
@@ -89,16 +79,15 @@ void setup()
   Serial.println("BME280: Init OK!");
 
   // init QMC5880
-  while (!compass.begin()) {
-    Serial.println("Could not find a valid QMC5883 sensor, check wiring!");
-    delay(1000);
-    yield();
+  while (!compass.begin()){
+    Serial.println("Could not find a valid 5883 sensor, check wiring!");
   }
-  if (compass.isQMC()) {
-    //compass.setRange(QMC5883_RANGE_2GA);
-    //compass.setMeasurementMode(QMC5883_CONTINOUS);
-    //compass.setDataRate(QMC5883_DATARATE_50HZ);
-    //compass.setSamples(QMC5883_SAMPLES_8);
+  if(compass.isHMC()){
+    Serial.println("HMC5883: Init OK!");
+  }else if(compass.isQMC()){
+    Serial.println("IQMC5883: Init OK!");
+  }else if(compass.isVCM()){
+    Serial.println("VCM5883L: INit OK!");
   }
 
 }
@@ -123,17 +112,7 @@ void loop(){
       readBME280Data();
       // 送信
       sendCANMessage1Sec();
-      // テストコード
-      sVector_t magData = compass.readRaw();
-      // 磁気データをシリアルモニタに出力
-      Serial.print("X: ");
-      Serial.print(magData.XAxis);
-      Serial.print(" Y: ");
-      Serial.print(magData.YAxis);
-      Serial.print(" Z: ");
-      Serial.println(magData.ZAxis);
       }
-
     if (count % UPDATE_INTERVAL_10SEC == 0){  // 10秒毎
       // 変更・取得 
       modifyCANDataCAN_CCCC2222(CAN_CCCC2222);
@@ -166,12 +145,12 @@ void readBME280Data(){
     globalPressInt = pressInt;
 
     // 確認用に残しておく
-    // Serial.println("Temperature = " + String(temperature) + " *C");
-    // Serial.println("Humidity = " + String(humidity) + " %");
-    // Serial.println("Pressure = " + String(pressure) + " hPa");
-    Serial.println(tempInt);
-    Serial.println(humidInt);
-    Serial.println(pressInt);
+    Serial.println("Temperature = " + String(temperature) + " *C");
+    Serial.println("Humidity = " + String(humidity) + " %");
+    Serial.println("Pressure = " + String(pressure) + " hPa");
+    // Serial.println(tempInt);
+    // Serial.println(humidInt);
+    // Serial.println(pressInt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
