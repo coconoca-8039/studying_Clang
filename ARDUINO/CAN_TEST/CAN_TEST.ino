@@ -25,16 +25,22 @@
 void sendCANMessage1Sec();
 void sendCANMessage10Sec();
 void receiveCANMessage(MCP_CAN& can, unsigned long& id, byte& length, byte* rxBuf);
-void modifyCANDataCAN_1234ABCD(byte *CAN_1234ABCD);
-void modifyCANDataCAN_AA1234AA(byte *CAN_AA1234AA);
-void modifyCANDataCAN_CCCC2222(byte *CAN_CCCC2222);
-void modifyCANDataCAN_CCCC4444(byte *CAN_CCCC4444);
+void modifyCANDataCAN_1234ABCD(byte *CAN_1234ABCD);  // 1から9までの数字を順番に動かすだけ
+void modifyCANDataCAN_AA1234AA(byte *CAN_AA1234AA);  // 気温・湿度・気圧
+void modifyCANDataCAN_CCCC2222(byte *CAN_CCCC2222);  // XYZセンサ
+void modifyCANDataCAN_CCCC4444(byte *CAN_CCCC4444);  // 未定
 void readBME280Data();
+void readQMC5883Data();
 
 // グローバル宣言
+// 気温・湿度・気圧
 uint16_t globalTempInt = 0;
 uint16_t globalHumidInt = 0;
 uint16_t globalPressInt = 0;
+// XYZ
+int16_t globalXAxis = 0;
+int16_t globalYAxis = 0;
+int16_t globalZAxis = 0;
 
 //構造体で定義したい
 unsigned long rxId;
@@ -121,23 +127,16 @@ void loop(){
       modifyCANDataCAN_1234ABCD(CAN_1234ABCD);
       modifyCANDataCAN_AA1234AA(CAN_AA1234AA);
       readBME280Data();
+      modifyCANDataCAN_CCCC4444(CAN_CCCC4444);
+      readQMC5883Data();
       // 送信
       sendCANMessage1Sec();
       // テストコード
-      sVector_t magData = compass.readRaw();
-      // 磁気データをシリアルモニタに出力
-      Serial.print("X: ");
-      Serial.print(magData.XAxis);
-      Serial.print(" Y: ");
-      Serial.print(magData.YAxis);
-      Serial.print(" Z: ");
-      Serial.println(magData.ZAxis);
       }
 
     if (count % UPDATE_INTERVAL_10SEC == 0){  // 10秒毎
       // 変更・取得 
       modifyCANDataCAN_CCCC2222(CAN_CCCC2222);
-      modifyCANDataCAN_CCCC4444(CAN_CCCC4444);
       // 送信
       sendCANMessage10Sec();
       }
@@ -169,15 +168,38 @@ void readBME280Data(){
     // Serial.println("Temperature = " + String(temperature) + " *C");
     // Serial.println("Humidity = " + String(humidity) + " %");
     // Serial.println("Pressure = " + String(pressure) + " hPa");
+    Serial.print("temp: ");
     Serial.println(tempInt);
+    Serial.print("humi: ");
     Serial.println(humidInt);
+    Serial.print("press: ");
     Serial.println(pressInt);
+}
+
+void readQMC5883Data(){
+    sVector_t magData = compass.readRaw();
+
+    float XAxis = magData.XAxis;
+    float YAxis = magData.YAxis;
+    float ZAxis = magData.ZAxis;
+
+    globalXAxis = XAxis;
+    globalYAxis = YAxis;
+    globalZAxis = ZAxis;
+
+    // 磁気データをシリアルモニタに出力
+    Serial.print("X: ");
+    Serial.print(magData.XAxis);
+    Serial.print(" Y: ");
+    Serial.print(magData.YAxis);
+    Serial.print(" Z: ");
+    Serial.println(magData.ZAxis);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 // 送信データの変更
 void modifyCANDataCAN_1234ABCD(byte *CAN_1234ABCD){
-  // 1sec
+  // 1sec周期で送信
     static int i  = 0;
     CAN_1234ABCD[0] = i;
     i += 1;
@@ -187,7 +209,7 @@ void modifyCANDataCAN_1234ABCD(byte *CAN_1234ABCD){
 }
 
 void modifyCANDataCAN_AA1234AA(byte *CAN_AA1234AA){
-  // 1sec
+  // 1secで送信
   // Byte1&2 : 気温　Byte3&4 : 湿度　Byte5&6 : 気圧
     // 気温データの格納
     CAN_AA1234AA[0] = globalTempInt >> 8; // 上位バイト
@@ -204,11 +226,26 @@ void modifyCANDataCAN_AA1234AA(byte *CAN_AA1234AA){
     // 残りのバイトはデフォルト値または他のデータで埋める
     CAN_AA1234AA[6] = 0xFF;
     CAN_AA1234AA[7] = 0xFF;
-    ;
 }
 
 void modifyCANDataCAN_CCCC2222(byte *CAN_CCCC2222){
-  // 10sec
+    // 1secで送信
+    // Byte1&2 : X方向　Byte3&4 : Y方向　Byte5&6 : Z方向
+    // X方向の格納
+    CAN_CCCC2222[0] = globalXAxis >> 8;
+    CAN_CCCC2222[1] = globalXAxis & 0xFF;
+
+    // Y方向の格納
+    CAN_CCCC2222[2] = globalYAxis >> 8;
+    CAN_CCCC2222[3] = globalYAxis & 0xFF;
+
+    // Z方向の格納
+    CAN_CCCC2222[4] = globalZAxis >> 8;
+    CAN_CCCC2222[5] = globalZAxis & 0xFF;
+
+    // 残りのバイトはデフォルト値または他のデータで埋める
+    CAN_CCCC2222[6] = 0xFF;
+    CAN_CCCC2222[7] = 0xFF;
     ;
 }
 
@@ -223,11 +260,11 @@ void sendCANMessage1Sec(){
     // 2つ目の引数を0にすると短いIDしか使えなくなるから注意
     CAN0.sendMsgBuf(0x1234ABCD, 1, 8, CAN_1234ABCD);  // 
     CAN0.sendMsgBuf(0xAA1234AA, 1, 8, CAN_AA1234AA);  // 
+    CAN0.sendMsgBuf(0xCCCC2222, 1, 8, CAN_CCCC2222);
 }
 
 // 送信処理 10sec
 void sendCANMessage10Sec(){
-    // CAN0.sendMsgBuf(0x11AAAABB, 1, 8, CAN_CCCC2222);
     // CAN0.sendMsgBuf(0x22BBBBCC, 1, 8, CAN_CCCC4444);
 }
 
