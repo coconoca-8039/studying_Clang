@@ -25,10 +25,10 @@
 void sendCANMessage1Sec();
 void sendCANMessage10Sec();
 void receiveCANMessage(MCP_CAN& can, unsigned long& id, byte& length, byte* rxBuf);
-void modifyCANDataCAN_1234ABCD(byte *CAN_1234ABCD);  // 1から9までの数字を順番に動かすだけ
-void modifyCANDataCAN_AA1234AA(byte *CAN_AA1234AA);  // 気温・湿度・気圧
-void modifyCANDataCAN_CCCC2222(byte *CAN_CCCC2222);  // XYZセンサ
-void modifyCANDataCAN_CCCC4444(byte *CAN_CCCC4444);  // 未定
+void modifyCANDataCAN_1234ABCD(byte *CAN_1234ABCD);  
+void modifyCANDataCAN_AA1234AA(byte *CAN_AA1234AA);  
+void modifyCANDataCAN_CCCC2222(byte *CAN_CCCC2222);  
+void modifyCANDataCAN_CCCC4444(byte *CAN_CCCC4444);  
 void readBME280Data();
 void readQMC5883Data();
 
@@ -46,25 +46,16 @@ int16_t globalZAxis = 0;
 unsigned long rxId;
 byte len;
 byte rxBuf[8];
-byte CAN_1234ABCD[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-byte CAN_AA1234AA[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-byte CAN_CCCC2222[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-byte CAN_CCCC4444[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+byte CAN_1234ABCD[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 1から9までの数字を順番に動かすだけ
+byte CAN_AA1234AA[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 気温・湿度・気圧
+byte CAN_CCCC2222[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // XYZセンサ
+byte CAN_CCCC4444[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};  // 未定
 
 // インスタンス作成
-MCP_CAN CAN0(10);// CAN0 CS: pin 10
-MCP_CAN CAN1(9); // CAN1 CS: pin 9
+MCP_CAN CAN0(10);// CAN0 CS: pin 10 送信
+MCP_CAN CAN1(9); // CAN1 CS: pin 9 受信
 Adafruit_BME280 bme;
 DFRobot_QMC5883 compass(&Wire, QMC5883_ADDRESS);
-
-int maxX = 2550;
-int maxY = 7480;
-int minX = -10150;
-int minY = -5060;
-//int offX = -6466;
-//int offY = 4349;
-int offX = 0;
-int offY = 0;
 
 void setup()
 {
@@ -260,7 +251,7 @@ void sendCANMessage1Sec(){
     // 2つ目の引数を0にすると短いIDしか使えなくなるから注意
     CAN0.sendMsgBuf(0x1234ABCD, 1, 8, CAN_1234ABCD);  // 
     CAN0.sendMsgBuf(0xAA1234AA, 1, 8, CAN_AA1234AA);  // 
-    CAN0.sendMsgBuf(0xCCCC2222, 1, 8, CAN_CCCC2222);
+    CAN0.sendMsgBuf(0xCCCC2222, 1, 8, CAN_CCCC2222);  //
 }
 
 // 送信処理 10sec
