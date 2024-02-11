@@ -1,12 +1,3 @@
-/***************************************************
-*
-*MCP2515 CAN Send and Recieve Test
-*MCP2515はSPI通信
-*BME280はI2C通信 ID:0x77
-*QMC5883はI2C通信 ID:0x0D
-*
-***************************************************/
-
 // include
 #include <mcp_can.h> // https://github.com/coryjfowler/MCP_CAN_lib
 #include <SPI.h>
@@ -20,10 +11,7 @@
 void sendCANMessage1Sec();
 void sendCANMessage10Sec();
 void receiveCANMessage(MCP_CAN& can, unsigned long& id, byte& length, byte* rxBuf);
-// void modifyCANDataCAN_1234ABCD(byte *CAN_1234ABCD);  
-// void modifyCANDataCAN_AA1234AA(byte *CAN_AA1234AA);  
-// void modifyCANDataCAN_CCCC2222(byte *CAN_CCCC2222);  
-// void modifyCANDataCAN_CCCC4444(byte *CAN_CCCC4444);  
+void modifyCANDataCAN_7777DDDD(byte *CAN_7777DDDD); 
 
 //基本情報
 unsigned long rxId;
