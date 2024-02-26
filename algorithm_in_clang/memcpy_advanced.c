@@ -46,6 +46,8 @@ int main() {
     printf("Salary: %.2f\n", emp.salary);
     NEWLINE;
 
+
+    // リトルエンディアンへの変換
     uint32_t original = 0x12345678;
     uint32_t reversed = reverse_endian(original);
 
