@@ -82,7 +82,7 @@ void loop() {
     if (count % UPDATE_INTERVAL_1SEC == 0){  // 1秒毎
       // 変更・取得
       modifyCANDataCAN_1777DDDD(CAN_1777DDDD);
-      // modifyCANDataCAN_1888DDDD(CAN_1888DDDD);
+      modifyCANDataCAN_1888DDDD(CAN_1888DDDD);
       
       // 送信
       sendCANMessage1Sec();
@@ -96,7 +96,7 @@ void loop() {
       sendCANMessage10Sec();
       }
 
-  receiveCANMessage(CAN2, rxId, len, rxBuf);
+  // receiveCANMessage(CAN2, rxId, len, rxBuf);
 
 }
 
@@ -170,31 +170,29 @@ static void printStr(const char *str, int len) {
 ///////////////////////////////////////////////////////////////////////////////////
 // 送信データの変更
 void modifyCANDataCAN_1777DDDD(byte *CAN_1777DDDD){
-  // 1sec周期で送信
-  // Serial.print(F("Satellites:      "));
-  // printInt(gps.satellites.value(), gps.satellites.isValid(), 5);
-  // Serial.println(F(" (Number of satellites in view)"));
+  // 1sec周期で送信 
+  Serial.print(F("Latitude:        "));
+  printFloat(gps.location.lat(), gps.location.isValid(), 11, 6);
+  Serial.println(F(" (Latitude in degrees)"));
+  double latitude = gps.location.lat();
+  uint32_t latitude_value = static_cast<uint32_t>(latitude * 1000000);
 
-  // Serial.print(F("HDOP:            "));
-  // printFloat(gps.hdop.hdop(), gps.hdop.isValid(), 6, 1);
-  // Serial.println(F(" (Horizontal Dilution of Precision)"));
-
-  // 
-  // Serial.print(F("Latitude:        "));
-  // printFloat(gps.location.lat(), gps.location.isValid(), 11, 6);
-  // Serial.println(F(" (Latitude in degrees)"));
+  CAN_1777DDDD[4] = (latitude_value >> 24) & 0xFF; // 上位バイト
+  CAN_1777DDDD[5] = (latitude_value >> 16) & 0xFF; // 次のバイト
+  CAN_1777DDDD[6] = (latitude_value >> 8) & 0xFF;  // 次のバイト
+  CAN_1777DDDD[7] = latitude_value & 0xFF;         // 下位バイト
 
   // 
   Serial.print(F("Longitude:       "));
   printFloat(gps.location.lng(), gps.location.isValid(), 12, 6);
   Serial.println(F(" (Longitude in degrees)"));
-  double latitude = gps.location.lng();
-  uint32_t latitude_value = static_cast<uint32_t>(latitude * 1000000);
+  double longitude = gps.location.lng();
+  uint32_t longitude_value = static_cast<uint32_t>(longitude * 1000000);
 
-  CAN_1777DDDD[0] = (latitude_value >> 24) & 0xFF; // 上位バイト
-  CAN_1777DDDD[1] = (latitude_value >> 16) & 0xFF; // 次のバイト
-  CAN_1777DDDD[2] = (latitude_value >> 8) & 0xFF;  // 次のバイト
-  CAN_1777DDDD[3] = latitude_value & 0xFF;         // 下位バイト
+  CAN_1777DDDD[0] = (longitude_value >> 24) & 0xFF; // 上位バイト
+  CAN_1777DDDD[1] = (longitude_value >> 16) & 0xFF; // 次のバイト
+  CAN_1777DDDD[2] = (longitude_value >> 8) & 0xFF;  // 次のバイト
+  CAN_1777DDDD[3] = longitude_value & 0xFF;         // 下位バイト
 
   // Serial.print(F("Location Age:    "));
   // printInt(gps.location.age(), gps.location.isValid(), 5);
@@ -203,11 +201,6 @@ void modifyCANDataCAN_1777DDDD(byte *CAN_1777DDDD){
   // Serial.print(F("Date & Time:     "));
   // printDateTime(gps.date, gps.time);
   // Serial.println(F(" (Date and time of last GPS fix)"));
-
-  // 
-  // Serial.print(F("Altitude:        "));
-  // printFloat(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
-  // Serial.println(F(" (Altitude in meters)"));
 
   // Serial.print(F("Course:          "));
   // printFloat(gps.course.deg(), gps.course.isValid(), 7, 2);
@@ -265,13 +258,35 @@ void modifyCANDataCAN_1888DDDD(byte *CAN_1888DDDD){
     if (i == 99){
       i = 0;
     }
+
+    Serial.print(F("Satellites:      "));
+    printInt(gps.satellites.value(), gps.satellites.isValid(), 5);
+    Serial.println(F(" (Number of satellites in view)"));
+    int satellitutes = gps.satellites.value();
+    CAN_1888DDDD[0] = (satellitutes); // 衛星を捕捉している個数
+
+    Serial.print(F("HDOP:            "));
+    printFloat(gps.hdop.hdop(), gps.hdop.isValid(), 6, 1);
+    Serial.println(F(" (Horizontal Dilution of Precision)"));
+    double hdop = gps.hdop.hdop();
+    uint32_t hdop_value = static_cast<uint32_t>(hdop * 10);
+    CAN_1888DDDD[1] = (hdop_value); // 精度
+
+    Serial.print(F("Altitude:        "));
+    printFloat(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
+    Serial.println(F(" (Altitude in meters)"));
+    double altitude = gps.altitude.meters();
+    uint32_t altitude_value = static_cast<uint32_t>(altitude * 100);
+    CAN_1888DDDD[2] = (altitude_value >> 8) & 0xFF; // 標高の上位
+    CAN_1888DDDD[3] = (altitude_value) & 0xFF; // 標高の下位
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 // 送信処理 1sec
 void sendCANMessage1Sec(){
     CAN2.sendMsgBuf(0x1777DDDD, 1, 8, CAN_1777DDDD);
-    //CAN2.sendMsgBuf(0x1888DDDD, 1, 8, CAN_1888DDDD);
+    CAN2.sendMsgBuf(0x1888DDDD, 1, 8, CAN_1888DDDD);
 }
 
 // 送信処理 10sec
