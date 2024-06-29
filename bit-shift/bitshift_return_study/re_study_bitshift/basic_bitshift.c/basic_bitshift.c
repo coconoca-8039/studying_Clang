@@ -49,6 +49,10 @@ uint16_t maskBits(uint16_t value, uint16_t mask){
     */
 }
 
+uint16_t toggleBit(uint16_t value, int bitPosition){
+    return value ^ (1 << bitPosition);  // XOR演算
+}
+
 int hexToBinary(uint64_t hex){
     for (int i = 15; i >= 0; i--){
         if ((hex & (1 << i))){  // // 16進数の値と、1を左にiビットシフトした値をAND演算
@@ -71,8 +75,16 @@ int main(){
     uint64_t original_hex = 0x04;   // 原型の16進数
     uint64_t left_shift_hex;       // 変換後の16進数
     uint64_t exchanger;
-    uint64_t mask = 0xABCD;   // 1010 1011 1100 1101
-    uint64_t value = 0x0F0F;  // 0000 1111 0000 1111
+
+    uint64_t mask = 0xABCD;          // 1010 1011 1100 1101
+    uint64_t value = 0x0F0F;         // 0000 1111 0000 1111
+
+    uint16_t toggled_hex = 0xABCD;   // 1010 1011 1100 1101
+    uint16_t toggled_value;          // ビットトグル後の値
+
+    uint16_t separated_value = 1000;  // 分割する16ビットの値
+    uint16_t high_byte, low_byte;
+    uint16_t recombinedValue;
 
     printf("オリジナルの10進数 : %llu\n", original_hex);  //10進数を表示
     printf("オリジナルの16進数 : %llX\n", original_hex);  //16進数を表示
@@ -101,6 +113,7 @@ int main(){
     hexToBinary(exchanger);                 // 0000 0000
 
     NEWLINE;
+    printf("ビットマスク\n");
     exchanger = maskBits(value, mask);
     printf("マスクされる値\n");
     hexToBinary(value);
@@ -110,4 +123,45 @@ int main(){
     printf("マスク後\n");
     hexToBinary(exchanger);                 // 0000 1010
 
+    NEWLINE;
+    printf("ビットトグル\n");
+    printf("オリジナル：");
+    hexToBinary(toggled_hex);  // 2進数を表示
+    toggled_value = toggleBit(toggled_hex, 0);  // 0ビット目をトグル
+    printf("ビットトグル (0ビット目) : %X\n", toggled_value);
+    hexToBinary(toggled_value);  // 2進数を表示
+    toggled_value = toggleBit(toggled_hex, 15);  // 15ビット目をトグル
+    printf("ビットトグル (15ビット目) : %X\n", toggled_value);
+    hexToBinary(toggled_value);  // 2進数を表示
+
+    NEWLINE;
+    printf("分割\n");
+    high_byte = (separated_value >> 8) & 0xFF;  // 上位バイトを抽出
+    low_byte = separated_value & 0xFF;  // 下位バイトを抽出
+
+    printf("オリジナルの値: %u\n", separated_value);
+    printf("オリジナルの16進数: %X\n", separated_value);
+    printf("オリジナルの2進数: ");
+    hexToBinary(separated_value);  // 2進数で表示
+
+    NEWLINE;
+    printf("上位バイト: %u\n", high_byte);
+    printf("上位バイトの2進数: ");
+    hexToBinary(high_byte);  // 2進数で表示
+    
+    NEWLINE;
+    printf("下位バイト: %u\n", low_byte);
+    printf("下位バイトの2進数: ");
+    hexToBinary(low_byte);  // 2進数で表示
+
+    recombinedValue = (high_byte << 8) | low_byte;
+    printf("再結合された値: %u\n", recombinedValue);
+
+    NEWLINE;
+    uint16_t xxxx_byte = 1000;
+    printf("%u\n", xxxx_byte);
+    hexToBinary(xxxx_byte);
+    xxxx_byte = xxxx_byte << 8;
+    printf("%u\n", xxxx_byte);
+    hexToBinary(xxxx_byte);
 }
