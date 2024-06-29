@@ -70,7 +70,6 @@ int hexToBinary(uint64_t hex){
 }
 
 int main(){
-    // 左シフト
     NEWLINE;
     uint64_t original_hex = 0x04;   // 原型の16進数
     uint64_t left_shift_hex;       // 変換後の16進数
@@ -85,6 +84,9 @@ int main(){
     uint16_t separated_value = 1000;  // 分割する16ビットの値
     uint16_t high_byte, low_byte;
     uint16_t recombinedValue;
+
+    uint32_t separated32_value = 1000000000;  // 32ビット(4バイト)
+    uint16_t byte1, byte2, byte3, byte4;
 
     printf("オリジナルの10進数 : %llu\n", original_hex);  //10進数を表示
     printf("オリジナルの16進数 : %llX\n", original_hex);  //16進数を表示
@@ -157,11 +159,13 @@ int main(){
     recombinedValue = (high_byte << 8) | low_byte;
     printf("再結合された値: %u\n", recombinedValue);
 
+    /*
     NEWLINE;
-    uint16_t xxxx_byte = 1000;
-    printf("%u\n", xxxx_byte);
-    hexToBinary(xxxx_byte);
-    xxxx_byte = xxxx_byte << 8;
-    printf("%u\n", xxxx_byte);
-    hexToBinary(xxxx_byte);
+    byte1 = (separated32_value >> 24) & 0xFF;  // 最上位バイト
+    byte2 = (separated32_value >> 16) & 0xFF;  // 次のバイト
+    byte3 = (separated32_value >> 8) & 0xFF;   // 次のバイト
+    byte4 = separated32_value & 0xFF;          // 最下位バイト
+    recombinedValue = (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
+    */
+   
 }
