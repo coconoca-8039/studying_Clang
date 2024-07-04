@@ -88,31 +88,43 @@ int main(){
     uint32_t separated32_value = 1000000000;  // 32ビット(4バイト)
     uint16_t byte1, byte2, byte3, byte4;
 
+    /************************************/
+
     printf("オリジナルの10進数 : %llu\n", original_hex);  //10進数を表示
     printf("オリジナルの16進数 : %llX\n", original_hex);  //16進数を表示
     NEWLINE;
     printf("オリジナル：");
     hexToBinary(original_hex);  //2進数を表示
 
+    /************************************/
+
     NEWLINE;
     exchanger = rightShift(original_hex, 1);
     printf("右シフト : %llu\n", exchanger);     
     hexToBinary(exchanger);                 // 0000 0010
+
+    /************************************/
 
     NEWLINE;
     exchanger = leftShift(original_hex, 1);
     printf("左シフト : %llu\n", exchanger);     
     hexToBinary(exchanger);                 // 0000 1000
 
+    /************************************/
+
     NEWLINE;
     exchanger = setBit(original_hex, 1);
     printf("ビットセット : %llu\n", exchanger);
     hexToBinary(exchanger);                 // 0000 0110
 
+    /************************************/
+
     NEWLINE;
     exchanger = clearBit(original_hex, 2);
     printf("ビットクリア : %llu\n", exchanger);
     hexToBinary(exchanger);                 // 0000 0000
+
+    /************************************/
 
     NEWLINE;
     printf("ビットマスク\n");
@@ -125,6 +137,8 @@ int main(){
     printf("マスク後\n");
     hexToBinary(exchanger);                 // 0000 1010
 
+    /************************************/
+
     NEWLINE;
     printf("ビットトグル\n");
     printf("オリジナル：");
@@ -135,6 +149,8 @@ int main(){
     toggled_value = toggleBit(toggled_hex, 15);  // 15ビット目をトグル
     printf("ビットトグル (15ビット目) : %X\n", toggled_value);
     hexToBinary(toggled_value);  // 2進数を表示
+
+    /************************************/
 
     NEWLINE;
     printf("分割\n");
@@ -158,6 +174,26 @@ int main(){
 
     recombinedValue = (high_byte << 8) | low_byte;
     printf("再結合された値: %u\n", recombinedValue);
+    NEWLINE;
+
+    /************************************/
+
+    bool x = true;  // 1
+    bool y = false; // 0
+    bool z = true;  // 1
+    int xyz = (x << 2) | (y << 1) | z;
+    printf("xyz = %d\n", xyz);
+    hexToBinary(xyz);
+    bool extracted_x = (xyz >> 2) & 1;
+    bool extracted_y = (xyz >> 1) & 1;
+    bool extracted_z = xyz & 1;
+    printf("extracted_x = %d\n", extracted_x);
+    printf("extracted_y = %d\n", extracted_y);
+    printf("extracted_z = %d\n", extracted_z);
+    NEWLINE;
+    int myXYZ = ((x << 2) & 0xFF) + ((y << 1) & 0xFF) + (z & 0xFF);
+    printf("XYZ = %d\n", myXYZ);
+    hexToBinary(myXYZ);
 
     /*
     NEWLINE;
@@ -167,5 +203,5 @@ int main(){
     byte4 = separated32_value & 0xFF;          // 最下位バイト
     recombinedValue = (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
     */
-   
+
 }
