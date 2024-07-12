@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #define NEWLINE printf("\n");
+#define PRINT(x) printf("%d\n", x);
 
 int main(){
     int nums[15] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
@@ -22,7 +23,6 @@ int main(){
     }
 
     /*
-    ChatGPT先生による模範解答
     for (int i = 1; i <= 15; i++){
         if (i % 3 == 0 && i % 5 == 0) printf("fizzbuzz\n");
         else if (i % 3 == 0) printf("fizz\n");
@@ -30,6 +30,15 @@ int main(){
         else PRINT(i);
     }
     */
+   
+    /*
+   for (int i = 1; i <= 15; i++){
+        (i % 3 == 0 && i % 5 == 0) ? printf("fizzbuzz\n") :
+        (i % 3 == 0) ? printf("fizz\n") :
+        (i % 5 == 0) ? printf("buzz\n") :
+        printf("%d\n", i);
+    }
+   */
 
     return 0;
 }
