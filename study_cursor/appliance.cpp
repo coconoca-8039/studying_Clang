@@ -51,4 +51,5 @@ int main(){
     wm.turnOn();
     wm.setPower(500);
     wm.setPower(200,1);
+    return 0;
 }
